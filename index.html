@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Introduction to Page Replacement Algorithms</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: black;
+            color: white;
+            margin: 20px;
+        }
+
+        h1, h2 {
+            text-align: center;
+        }
+
+        h1 {
+            position: relative;
+            animation: neonGlow 2s infinite alternate;
+        }
+
+        @keyframes neonGlow {
+            from {
+                text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #00f, 0 0 40px #00f, 0 0 70px #00f, 0 0 80px #00f, 0 0 100px #00f;
+            }
+            to {
+                text-shadow: 0 0 20px #fff, 0 0 30px #00f, 0 0 40px #00f, 0 0 70px #00f, 0 0 80px #00f, 0 0 100px #00f, 0 0 120px #00f;
+            }
+        }
+
+        p {
+            margin-bottom: 20px;
+        }
+
+        a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Introduction to Page Replacement Algorithms</h1>
+
+        <h2>Why Page Replacement Algorithms are Needed?</h2>
+        <p>
+            In computer systems, memory management is crucial for efficient operation. The main memory, or RAM, has limited space, and when it gets filled with processes and data, a decision must be made on which pages to keep in memory and which to swap out.
+        </p>
+        <p>
+            Page replacement algorithms play a vital role in determining which pages to retain in memory and which to replace, ensuring optimal performance and resource utilization.
+        </p>
+
+        <h2>Page Replacement Algorithms:</h2>
+
+        <h3>1. First In First Out (FIFO)</h3>
+        <p>
+            FIFO is one of the simplest page replacement algorithms. It follows the principle of "first come, first served." The oldest page in memory is the first one to be replaced when a page fault occurs. While easy to implement, FIFO may not always result in optimal performance, especially in scenarios where older pages might still be relevant.
+            <a href="FIFO.html" target="_blank">FIFO simulation</a>
+        </p>
+
+        <h3>2. Least Recently Used (LRU)</h3>
+        <p>
+            LRU is based on the idea that pages that have been least recently used are less likely to be used again soon. It keeps track of the order in which pages are accessed and replaces the page that has not been used for the longest time. LRU is effective in maintaining data locality and reducing the risk of replacing frequently used pages.
+            <a href="LRU.html" target="_blank">LRU simulation</a>
+        </p>
+
+        <h3>3. Least Frequently Used (LFU)</h3>
+        <p>
+            LFU is a page replacement algorithm that considers the frequency of page accesses. It maintains a count for each page indicating how often it has been used. When a page fault occurs, LFU selects the page with the least frequency for replacement. This algorithm is suitable for scenarios where page usage patterns vary over time.
+            <a href="LFU.html" target="_blank">LFU simulation</a>
+        </p>
+
+        <h3>4. Second Chance</h3>
+        <p>
+            The Second Chance algorithm is an enhancement of FIFO. It adds a "reference bit" to each page to indicate whether the page has been accessed recently. When a page fault occurs, Second Chance examines the reference bit. If the bit is set, the page is given a second chance and is not immediately replaced. If the bit is not set, the page is a candidate for replacement.
+            <a href="FIFO_secondchance.html" target="_blank">Second Chance</a>
+        </p>
+
+        <p>
+            Each of these page replacement algorithms has its advantages and limitations, and the choice depends on the specific characteristics and requirements of the system.
+        </p>
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>

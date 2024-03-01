@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LFU Simulation</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: black;
+            color: white;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00ffcc; /* Neon green color */
+            text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc, 0 0 30px #00ffcc, 0 0 40px #00ffcc, 0 0 70px #00ffcc, 0 0 80px #00ffcc, 0 0 100px #00ffcc;
+        }
+
+        #input-section {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        #memory-visualization {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .memory-block {
+            width: 50px;
+            height: 50px;
+            border: 1px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        #results-section {
+            text-align: center;
+        }
+
+        #controls-section {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            background-color: #007BFF; /* Bootstrap primary color */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3; /* Darker shade on hover */
+        }
+    </style>
+</head>
+<body>
+
+<h1>LFU Simulation</h1>
+
+<div id="input-section">
+    <label for="pageRequests">Enter Page Requests:</label>
+    <input type="text" id="pageRequests" placeholder="e.g., 1 2 3 4">
+    <button onclick="submitPageRequests()">Submit</button>
+</div>
+
+<div id="memory-visualization"></div>
+
+<div id="results-section"></div>
+
+<div id="controls-section">
+    <button onclick="startSimulation()">Play</button>
+    <button onclick="pauseSimulation()">Pause</button>
+    <button onclick="resetSimulation()">Reset</button>
+</div>
+
+<script>
+    let pageRequests = [];
+    let memorySize = 4;
+    let memory = [];
+    let pageHits = 0;
+    let pageFaults = 0;
+    let currentIndex = 0;
+    let isSimulationPaused = false;
+    let simulationTimeout;
+
+    function submitPageRequests() {
+        const inputField = document.getElementById('pageRequests');
+        const input = inputField.value.trim();
+        pageRequests = input.split(' ').map(Number);
+
+        // Clear previous memory and results
+        memory = [];
+        pageHits = 0;
+        pageFaults = 0;
+        currentIndex = 0;
+        isSimulationPaused = true;
+        updateMemoryVisualization();
+        updateResultsSection();
+
+        // Start the simulation
+        simulateLFU();
+    }
+
+    function startSimulation() {
+        isSimulationPaused = false;
+        simulateLFU();
+    }
+
+    function pauseSimulation() {
+        isSimulationPaused = true;
+        clearTimeout(simulationTimeout);
+    }
+
+    function resetSimulation() {
+        memory = [];
+        pageHits = 0;
+        pageFaults = 0;
+        currentIndex = 0;
+        isSimulationPaused = true;
+        updateMemoryVisualization();
+        updateResultsSection();
+    }
+
+    function simulateLFU() {
+        if (!isSimulationPaused && currentIndex < pageRequests.length) {
+            const page = pageRequests[currentIndex];
+    
+            if (memory.some((entry) => entry.page === page)) {
+                pageHits++;
+                const pageIndex = memory.findIndex((entry) => entry.page === page);
+                memory[pageIndex].frequency++;
+            } else {
+                if (memory.length < memorySize) {
+                    memory.push({ page, frequency: 1 });
+                } else {
+                    let leastFrequentPage = memory[0];
+                    for (let i = 1; i < memory.length; i++) {
+                        if (memory[i].frequency < leastFrequentPage.frequency) {
+                            leastFrequentPage = memory[i];
+                        }
+                    }
+                    const leastFrequentPageIndex = memory.indexOf(leastFrequentPage);
+                    memory[leastFrequentPageIndex] = { page, frequency: 1 };
+                }
+                pageFaults++;
+            }
+    
+            currentIndex++;
+            updateMemoryVisualization();
+            updateResultsSection();
+    
+            // Schedule the next step with a delay (adjust the delay as needed)
+            simulationTimeout = setTimeout(simulateLFU, 1000);
+        }
+    }
+    
+    function updateMemoryVisualization() {
+        const memoryVisualization = document.getElementById('memory-visualization');
+        memoryVisualization.innerHTML = memory.map((entry, index) => {
+            return `<div class="memory-block">${entry.page !== undefined ? entry.page : ''}</div>`;
+        }).join('');
+    }    
+
+    function updateResultsSection() {
+        const resultsSection = document.getElementById('results-section');
+        resultsSection.innerHTML = `<p>Page Hits: ${pageHits}</p><p>Page Faults: ${pageFaults}</p>`;
+    }
+</script>
+
+
+</body>
+</html>
