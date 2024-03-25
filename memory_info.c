@@ -131,8 +131,6 @@ void display_running_processes() {
     }
 }
 
-
-// Function to display memory info
 void display_memory_info() {
     struct sysinfo info;
 
@@ -147,21 +145,139 @@ void display_memory_info() {
     }
 }
 
+void display_cpu_info() {
+    FILE *cpuinfo;
+    char line[BUFSIZE];
+
+    // Open the cpuinfo file
+    cpuinfo = fopen("/proc/cpuinfo", "r");
+    if (cpuinfo != NULL) {
+        // Read lines from the cpuinfo file
+        while (fgets(line, BUFSIZE, cpuinfo) != NULL) {
+            // Search for the line containing "model name" (CPU model)
+            if (strstr(line, "model name") != NULL) {
+                // Print the CPU model
+                printf("CPU Model: %s", line + strlen("model name") + 2); // Skip "model name" and ": "
+                break;
+            }
+        }
+        fclose(cpuinfo);
+    } else {
+        perror("Failed to open cpuinfo file");
+    }
+}
+
+
+void display_disk_usage() {
+    FILE *disk_info;
+    char line[BUFSIZE];
+    char filesystem[BUFSIZE];
+    char used[BUFSIZE];
+    char available[BUFSIZE];
+    char capacity[BUFSIZE];
+
+    // Open the command "df" for reading
+    disk_info = popen("df -h /", "r");
+    if (disk_info == NULL) {
+        perror("Failed to run df command");
+        return;
+    }
+
+    // Read and ignore the header line
+    if (fgets(line, BUFSIZE, disk_info) == NULL) {
+        perror("Failed to read header line from df output");
+        pclose(disk_info);
+        return;
+    }
+
+    // Read the disk usage information
+    if (fgets(line, BUFSIZE, disk_info) != NULL) {
+        // Parse the line to extract filesystem, used space, available space, and capacity
+        sscanf(line, "%s %s %s %s %s", filesystem, used, available, capacity);
+
+        // Print the disk usage information
+        printf("Filesystem: %s\n", filesystem);
+        printf("Used: %s\n", used);
+        printf("Available: %s\n", available);
+        printf("Capacity: %s\n", capacity);
+    } else {
+        perror("Failed to read disk usage information from df output");
+    }
+
+    // Close the command
+    pclose(disk_info);
+}
+
+
+void display_network_activity() {
+    FILE *netdev_file;
+    char line[BUFSIZE];
+
+    // Open the /proc/net/dev file for reading
+    netdev_file = fopen("/proc/net/dev", "r");
+    if (netdev_file == NULL) {
+        perror("Failed to open /proc/net/dev file");
+        return;
+    }
+
+    // Print the header for network activity information
+    printf("Interface\t\tRX bytes\t\tTX bytes\n");
+
+    // Skip the first two lines (header lines) in /proc/net/dev
+    if (fgets(line, BUFSIZE, netdev_file) == NULL) {
+        perror("Failed to read first line from /proc/net/dev file");
+        fclose(netdev_file);
+        return;
+    }
+    if (fgets(line, BUFSIZE, netdev_file) == NULL) {
+        perror("Failed to read second line from /proc/net/dev file");
+        fclose(netdev_file);
+        return;
+    }
+
+    // Read and print network activity information for each interface
+    while (fgets(line, BUFSIZE, netdev_file) != NULL) {
+        char interface[BUFSIZE];
+        unsigned long rx_bytes, tx_bytes;
+
+        // Parse the line to extract interface name, RX bytes, and TX bytes
+        if (sscanf(line, "%s %lu %*lu %*lu %*lu %*lu %*lu %*lu %*lu %lu", interface, &rx_bytes, &tx_bytes) == 3) {
+            // Print the network activity information
+            printf("%s\t\t%lu\t\t%lu\n", interface, rx_bytes, tx_bytes);
+        }
+    }
+
+    // Close the file
+    fclose(netdev_file);
+}
+
+
 int main() {
     while (1) {
         system("clear"); // Clear screen before displaying updated information
         change_color();
         printf(" ____  _   _   _   ____    _    ____  _   _ ____   ___    _    ____  ____  \n");
-printf("/ ___|  _ \\| | | | |  _ \\  / \\  / ___|| 	| | | __ ) / _ \\  / \\  |  _ \\|  _ \\ \n");
-printf("| |   | |_) | | | | | | | |/ _ \\ \\___ \\| |_| |  _ \\| | | |/ _ \\ | |_) | | | |\n");
-printf("| |___|  __/| |_| | | |_| / ___ \\ ___) |  _  | |_) | |_| / ___ \\|  _ <| |_| |\n");
-printf(" \\____|_|    \\___/  |____/_/   \\_\\____/|_| |_|____/ \\___/_/   \\_\\_| \\_\\____/\n");
-
+        printf("/ ___|  _ \\| | | | |  _ \\  / \\  / ___|| 	| | | __ ) / _ \\  / \\  |  _ \\|  _ \\ \n");
+        printf("| |   | |_) | | | | | | | |/ _ \\ \\___ \\| |_| |  _ \\| | | |/ _ \\ | |_) | | | |\n");
+        printf("| |___|  __/| |_| | | |_| / ___ \\ ___) |  _  | |_) | |_| / ___ \\|  _ <| |_| |\n");
+        printf(" \\____|_|    \\___/  |____/_/   \\_\\____/|_| |_|____/ \\___/_/   \\_\\_| \\_\\____/\n");
+        
         printf("==== Ongoing Processes ====\n");
         display_running_processes();
 
         printf("\n==== Memory Dashboard ====\n");
         display_memory_info();
+
+        printf("\n==== CPU Info ====\n");
+        display_cpu_info();
+
+       
+
+        printf("\n==== Disk Usage ====\n");
+        display_disk_usage();
+
+        printf("\n==== Network Activity ====\n");
+        display_network_activity();
 
         // Delay before refreshing information
         sleep(DELAY_SECONDS);
@@ -169,4 +285,3 @@ printf(" \\____|_|    \\___/  |____/_/   \\_\\____/|_| |_|____/ \\___/_/   \\_\\
 
     return 0;
 }
-
